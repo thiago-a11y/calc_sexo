@@ -8,18 +8,15 @@ export default function App() {
   const [mostrarHist, setMostrarHist] = useState(false)
 
   const limpar = () => { setDisplay("0"); setExpressao("") }
-
   const apagar = () => {
     if (display.length <= 1 || display === "Erro") setDisplay("0")
     else setDisplay(display.slice(0, -1))
   }
-
   const digito = (d: string) => {
     if (display === "0" && d !== ".") setDisplay(d)
     else if (display === "Erro") setDisplay(d)
     else setDisplay(display + d)
   }
-
   const operador = (op: string) => {
     if (display === "Erro") return
     setExpressao(display + " " + op + " ")
@@ -38,13 +35,11 @@ export default function App() {
       case "log": r = Math.log10(v); break
       case "ln": r = Math.log(v); break
       case "pow2": r = v * v; break
-      case "pow3": r = v * v * v; break
       case "inv": r = 1 / v; break
       case "abs": r = Math.abs(v); break
       case "pi": r = Math.PI; break
       case "e": r = Math.E; break
       case "pct": r = v / 100; break
-      case "fact": r = v < 0 || v > 170 ? NaN : Array.from({length: v}, (_, i) => i + 1).reduce((a, b) => a * b, 1); break
       default: r = v
     }
     if (!isFinite(r) || isNaN(r)) { setDisplay("Erro"); return }
@@ -54,8 +49,7 @@ export default function App() {
   const calcular = () => {
     const expr = expressao ? expressao + display : display
     try {
-      const js = expr.replace(/×/g, "*").replace(/÷/g, "/").replace(/\^/g, "**")
-      if (!/^[\d\s+\-*/().%e**]+$/.test(js)) { setDisplay("Erro"); return }
+      const js = expr.replace(/\u00d7/g, "*").replace(/\u00f7/g, "/").replace(/\^/g, "**")
       const r = Function(`"use strict"; return (${js})`)()
       if (!isFinite(r)) { setDisplay("Erro"); setExpressao(""); return }
       const s = String(parseFloat(Number(r).toPrecision(12)))
@@ -66,16 +60,17 @@ export default function App() {
 
   type Btn = { l: string; a: () => void; c?: string; s?: number }
   const btns: Btn[] = [
-    {l:"sin",a:()=>fn("sin"),c:"f"},{l:"cos",a:()=>fn("cos"),c:"f"},{l:"tan",a:()=>fn("tan"),c:"f"},{l:"n!",a:()=>fn("fact"),c:"f"},
-    {l:"ln",a:()=>fn("ln"),c:"f"},{l:"log",a:()=>fn("log"),c:"f"},{l:"x²",a:()=>fn("pow2"),c:"f"},{l:"√",a:()=>fn("sqrt"),c:"f"},
-    {l:"π",a:()=>fn("pi"),c:"f"},{l:"e",a:()=>fn("e"),c:"f"},{l:"C",a:limpar,c:"cl"},{l:"⌫",a:apagar,c:"cl"},
+    {l:"sin",a:()=>fn("sin"),c:"f"},{l:"cos",a:()=>fn("cos"),c:"f"},{l:"tan",a:()=>fn("tan"),c:"f"},{l:"%",a:()=>fn("pct"),c:"f"},
+    {l:"ln",a:()=>fn("ln"),c:"f"},{l:"log",a:()=>fn("log"),c:"f"},{l:"x\u00B2",a:()=>fn("pow2"),c:"f"},{l:"\u221A",a:()=>fn("sqrt"),c:"f"},
+    {l:"\u03C0",a:()=>fn("pi"),c:"f"},{l:"e",a:()=>fn("e"),c:"f"},{l:"C",a:limpar,c:"cl"},{l:"\u232B",a:apagar,c:"cl"},
     {l:"MC",a:()=>setMemoria(0),c:"m"},{l:"MR",a:()=>setDisplay(String(memoria)),c:"m"},{l:"M+",a:()=>setMemoria(m=>m+parseFloat(display||"0")),c:"m"},{l:"M-",a:()=>setMemoria(m=>m-parseFloat(display||"0")),c:"m"},
-    {l:"7",a:()=>digito("7")},{l:"8",a:()=>digito("8")},{l:"9",a:()=>digito("9")},{l:"÷",a:()=>operador("÷"),c:"op"},
-    {l:"4",a:()=>digito("4")},{l:"5",a:()=>digito("5")},{l:"6",a:()=>digito("6")},{l:"×",a:()=>operador("×"),c:"op"},
-    {l:"1",a:()=>digito("1")},{l:"2",a:()=>digito("2")},{l:"3",a:()=>digito("3")},{l:"−",a:()=>operador("-"),c:"op"},
+    {l:"7",a:()=>digito("7")},{l:"8",a:()=>digito("8")},{l:"9",a:()=>digito("9")},{l:"\u00F7",a:()=>operador("\u00F7"),c:"op"},
+    {l:"4",a:()=>digito("4")},{l:"5",a:()=>digito("5")},{l:"6",a:()=>digito("6")},{l:"\u00D7",a:()=>operador("\u00D7"),c:"op"},
+    {l:"1",a:()=>digito("1")},{l:"2",a:()=>digito("2")},{l:"3",a:()=>digito("3")},{l:"\u2212",a:()=>operador("-"),c:"op"},
     {l:"0",a:()=>digito("0"),s:2},{l:".",a:()=>digito(".")},{l:"+",a:()=>operador("+"),c:"op"},
     {l:"=",a:calcular,c:"eq",s:4},
   ]
+
   const cor = (c?: string) => {
     switch(c) {
       case "f": return "bg-slate-700 hover:bg-slate-600 text-cyan-400"
